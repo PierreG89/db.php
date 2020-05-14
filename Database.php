@@ -19,7 +19,7 @@ class Database
     private $result;
     private $result_rows;
     private $database_name;
-    private static $instance;
+    private static $instances = array();
 
     /**
      * Query history
@@ -35,11 +35,12 @@ class Database
      * @param string $username
      * @param string $password
      * @param string $host
+     * @param string $key
      * @throws DatabaseException
      */
-    function __construct($database_name, $username, $password, $host = 'localhost')
+    function __construct($database_name, $username, $password, $host = 'localhost', $key = 'default')
     {
-        self::$instance = $this;
+        self::$instances[$key] = $this;
 
         $this->database_name = $database_name;
         $this->mysql = mysqli_connect($host, $username, $password, $database_name);
@@ -53,19 +54,20 @@ class Database
     /**
      * Get instance
      *
+     * @param string $key
      * @param string $database_name
      * @param string $username
      * @param string $password
      * @param string $host
      * @return Database
      */
-    final public static function instance($database_name = null, $username = null, $password = null, $host = 'localhost')
+    final public static function instance($key = 'default', $database_name = null, $username = null, $password = null, $host = 'localhost')
     {
-        if (!isset(self::$instance)) {
-            self::$instance = new Database($database_name, $username, $password, $host);
+        if(!array_key_exists($key, self::$instances)) {
+            self::$instances[$key] = new Database($database_name, $username, $password, $host);
         }
 
-        return self::$instance;
+        return self::$instances[$key];
     }
 
     /**
@@ -587,7 +589,7 @@ class Database
     private function clean($str)
     {
         if (is_string($str)) {
-            if (!mb_detect_encoding($str, 'UTF-8', TRUE)) {
+            if (!mb_detect_encoding($str, 'UTF-8', true)) {
                 $str = utf8_encode($str);
             }
         }
