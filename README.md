@@ -139,26 +139,29 @@ $db->delete(
 );
 ```
 
-### Singleton
-**Access the database instance outside the global scope after initializing it**
+### Singleton or Multiton, you choose
+**Access db instances outside the global scope after initializing it**
 
 Usage:
 
 ```
-$my_db = Database::instance();
+$my_first_db = Database::instance();
+$my_second_db = Database::instance('my_second_db_identifier');
 ```
 
 Example:
 
 ```
 // Global scope
-$db = new Database($database_name, $username, $password, $host);
+$my_first_db = new Database($database_name, $username, $password, $host);
+$my_second_db = new Database($database_name, $username, $password, $host, 'my_second_db_identifier');
 
 // Function scope
 function something() {
     // We could simply use `global $db;`, but using globals is bad. Instead we can do this:
-    $db = Database::instance();
+    $my_first_db = Database::instance();
+    $my_second_db = Database::instance('my_second_db_identifier');
 
-    // And now we have access to $db inside the function
+    // And now we have access to $my_first_db or $my_second_db inside the function
 }
 ```
